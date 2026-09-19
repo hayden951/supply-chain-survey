@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
- 
+
 type CategoryKey = "vendor" | "cloud" | "procurement" | "flash" | "ai";
- 
+
 interface Answer { label: string; s: number; }
 interface Question { category: string; subtitle: string; text: string; answers: Answer[]; key: CategoryKey; badge?: string; }
 interface Threshold { lo: number; hi: number; label: string; emoji: string; color: string; bg: string; border: string; desc: string; remediate: string; }
 interface RiskStyle { label: string; color: string; bg: string; border: string; }
- 
+
 const CATEGORIES: { [K in CategoryKey]: string } = {
   vendor:      "Vendor & Hardware Concentration",
   cloud:       "Cloud Optionality",
@@ -15,7 +15,7 @@ const CATEGORIES: { [K in CategoryKey]: string } = {
   flash:       "Flash Dependency & Architecture",
   ai:          "AI & Growth",
 };
- 
+
 const questions: Question[] = [
   { category: "Vendor & Hardware Concentration", subtitle: "Vendor Concentration", text: "How many storage hardware vendors do you actively rely on today?", answers: [{ label: "Three or more", s: 1 }, { label: "Two", s: 2 }, { label: "Effectively one, with a backup option", s: 3 }, { label: "A single vendor", s: 4 }], key: "vendor" },
   { category: "Vendor & Hardware Concentration", subtitle: "Adaptability", text: "If your primary vendor's hardware became unavailable, how easily could you run your storage on hardware from a different supplier?", answers: [{ label: "Easily — our infrastructure software stack runs on standard servers and storage from many suppliers", s: 1 }, { label: "With some effort or professional services", s: 2 }, { label: "Difficult — tightly tied to one platform", s: 3 }, { label: "Not possible — hardware and software are locked together", s: 4 }], key: "vendor" },
@@ -28,31 +28,31 @@ const questions: Question[] = [
   { category: "AI & Growth", subtitle: "Adaptability", text: "How fast is your unstructured data growing year over year?", answers: [{ label: "Under 5%", s: 1 }, { label: "5–15%", s: 2 }, { label: "15–30%", s: 3 }, { label: "More than 30%", s: 4 }], key: "ai" },
   { category: "AI & Growth", subtitle: "Mission Critical", text: "How much do your AI or data-intensive projects depend on fast flash storage to keep up?", answers: [{ label: "Not much — no real AI/analytics pressure on storage today", s: 1 }, { label: "Early exploration; light demand", s: 2 }, { label: "Growing — several projects need fast storage", s: 3 }, { label: "Heavily — AI in production; flash is a hard requirement", s: 4 }], key: "ai" },
 ];
- 
+
 const THRESHOLDS: Threshold[] = [
   { lo: 10, hi: 19, label: "Low Risk",      emoji: "🟢", color: "#14532d", bg: "#dcfce7", border: "#16a34a", desc: "Strong architectural flexibility, multi-vendor, cloud-ready. Monitor the market but no urgent action needed.", remediate: "12+ months runway — no urgent action needed." },
   { lo: 20, hi: 29, label: "Moderate Risk", emoji: "🟡", color: "#713f12", bg: "#fef9c3", border: "#ca8a04", desc: "Some exposure to vendor concentration or supply chain gaps. Begin evaluating alternatives and cloud optionality.", remediate: "6–12 months — begin planning now." },
   { lo: 30, hi: 34, label: "High Risk",     emoji: "🟠", color: "#7c2d12", bg: "#ffedd5", border: "#ea580c", desc: "Meaningful vulnerability to supply disruption. Prioritize architectural review and procurement strategy.", remediate: "3–6 months — prioritize remediation this quarter." },
   { lo: 35, hi: 40, label: "Critical Risk", emoji: "🔴", color: "#7f1d1d", bg: "#fee2e2", border: "#dc2626", desc: "Highly exposed. Single-vendor, no cloud escape valve. Supply chain disruption could stall projects or trigger emergency spending.", remediate: "Act now — immediate action required." },
 ];
- 
+
 const catKeys: CategoryKey[] = ["vendor", "cloud", "procurement", "flash", "ai"];
- 
+
 function getOverallRisk(score: number): Threshold {
   return THRESHOLDS.find(t => score >= t.lo && score <= t.hi) || THRESHOLDS[THRESHOLDS.length - 1];
 }
- 
+
 function getCatRisk(score: number, max: number): RiskStyle {
   const pct = score / max;
   if (pct <= 0.33) return { label: "Low Risk",    color: "#14532d", bg: "#dcfce7", border: "#16a34a" };
   if (pct <= 0.66) return { label: "Medium Risk", color: "#713f12", bg: "#fef9c3", border: "#ca8a04" };
   return                  { label: "High Risk",   color: "#7f1d1d", bg: "#fee2e2", border: "#dc2626" };
 }
- 
+
 function getCatIndex(category: string): number {
   return catKeys.findIndex((k: CategoryKey) => CATEGORIES[k] === category);
 }
- 
+
 function downloadPDF(): void {
   const root = document.getElementById('results-printable');
   const clone = root!.cloneNode(true) as HTMLElement;
@@ -69,17 +69,18 @@ function downloadPDF(): void {
     const c = document.getElementById('print-clone'); if (c) c.remove();
   }, 1500);
 }
- 
+
 function ScoringHeader() {
   return (
     <div style={{ background: "#fff", borderRadius: 12, padding: "20px 28px", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", borderLeft: "4px solid #111" }}>
-      <p style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Qumulo</p>
+      <p style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Qumulo · 2-Minute Self-Assessment</p>
       <p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: "0 0 6px" }}>Storage Hardware Supply Chain Assessment</p>
-      <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>Flash lead times, vendor concentration, and AI-driven growth are squeezing infrastructure supply chains. Each question is scored <strong>1–4</strong> (1 = low risk, 4 = high risk).</p>
+      <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 6px", lineHeight: 1.6 }}>Flash lead times, vendor concentration, and AI-driven growth are squeezing infrastructure supply chains. Answer 10 quick questions to see how the industry shortage may affect your planning — and what to do about it.</p>
+      <p style={{ fontSize: 12, color: "#9ca3af", margin: "0 0 16px", fontStyle: "italic" }}>Your answers are used only to generate your assessment. No pitch — just a diagnostic.</p>
       <div style={{ display: "flex", gap: 20, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
-        {[["5", "Categories"], ["10", "Questions"], ["40", "Max Score"]].map(([val, lbl]) => (
+        {[["5", "Categories"], ["10", "Questions"], ["40", "Max Score"], ["~2 min", "Time"]].map(([val, lbl]) => (
           <div key={lbl} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#111" }}>{val}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#111" }}>{val}</div>
             <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{lbl}</div>
           </div>
         ))}
@@ -87,35 +88,35 @@ function ScoringHeader() {
     </div>
   );
 }
- 
+
 export default function Page() {
   const [currentQ, setCurrentQ] = useState<number>(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState<boolean>(false);
- 
+
   const q: Question = questions[currentQ];
   const isLast: boolean = currentQ === questions.length - 1;
   const progress: number = ((currentQ + 1) / questions.length) * 100;
   const catIdx: number = getCatIndex(q.category);
- 
+
   function handleNext(): void {
     if (selected === null) return;
     const newAnswers = [...answers, selected];
     if (isLast) { setAnswers(newAnswers); setDone(true); }
     else { setAnswers(newAnswers); setCurrentQ(currentQ + 1); setSelected(null); }
   }
- 
+
   function handleRestart(): void {
     setCurrentQ(0); setAnswers([]); setSelected(null); setDone(false);
   }
- 
+
   if (done) {
     const totals: { [K in CategoryKey]: number } = { vendor: 0, cloud: 0, procurement: 0, flash: 0, ai: 0 };
     answers.forEach((ai: number, qi: number) => { totals[questions[qi].key] += questions[qi].answers[ai].s; });
     const totalScore: number = Object.values(totals).reduce((a, b) => a + b, 0);
     const overall: Threshold = getOverallRisk(totalScore);
- 
+
     return (
       <div style={{ minHeight: "100vh", background: "#f9fafb", padding: 24 }}>
         <div id="results-printable" style={{ maxWidth: 560, margin: "0 auto" }}>
@@ -229,7 +230,7 @@ export default function Page() {
       </div>
     );
   }
- 
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#f9fafb" }}>
       <div style={{ maxWidth: 560, width: "100%" }}>
@@ -262,4 +263,3 @@ export default function Page() {
     </div>
   );
 }
- 

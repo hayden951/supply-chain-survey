@@ -74,7 +74,7 @@ function ScoringHeader() {
   return (
     <div style={{ background: "#fff", borderRadius: 12, padding: "20px 28px", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", borderLeft: "4px solid #111" }}>
       <p style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Qumulo · 2-Minute Self-Assessment</p>
-      <p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: "0 0 6px" }}><p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: "0 0 6px" }}>Evaluate the impact of hardware shortages on infrastructure operations and planning.</p></p>
+      <p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: "0 0 6px" }}>Evaluate the impact of hardware shortages on infrastructure operations and planning.</p>
       <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 6px", lineHeight: 1.6 }}>Flash lead times, vendor concentration, and AI-driven growth are squeezing infrastructure supply chains. Answer 10 quick questions to see how the industry shortage may affect your planning — and what to do about it.</p>
       <p style={{ fontSize: 12, color: "#9ca3af", margin: "0 0 16px", fontStyle: "italic" }}>Your answers are used only to generate your assessment. No pitch — just a diagnostic.</p>
       <div style={{ display: "flex", gap: 20, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>

@@ -2,9 +2,10 @@
 import { useState } from "react";
 
 type CategoryKey = "vendor" | "cloud" | "procurement" | "flash" | "ai";
+type Screen = "intro" | "quiz" | "results";
 
 interface Answer { label: string; s: number; }
-interface Question { category: string; subtitle: string; text: string; answers: Answer[]; key: CategoryKey; badge?: string; }
+interface Question { category: string; subtitle: string; text: string; answers: Answer[]; key: CategoryKey; }
 interface Threshold { lo: number; hi: number; label: string; emoji: string; color: string; bg: string; border: string; desc: string; remediate: string; }
 interface RiskStyle { label: string; color: string; bg: string; border: string; }
 
@@ -41,18 +42,15 @@ const catKeys: CategoryKey[] = ["vendor", "cloud", "procurement", "flash", "ai"]
 function getOverallRisk(score: number): Threshold {
   return THRESHOLDS.find(t => score >= t.lo && score <= t.hi) || THRESHOLDS[THRESHOLDS.length - 1];
 }
-
 function getCatRisk(score: number, max: number): RiskStyle {
   const pct = score / max;
   if (pct <= 0.33) return { label: "Low Risk",    color: "#14532d", bg: "#dcfce7", border: "#16a34a" };
   if (pct <= 0.66) return { label: "Medium Risk", color: "#713f12", bg: "#fef9c3", border: "#ca8a04" };
   return                  { label: "High Risk",   color: "#7f1d1d", bg: "#fee2e2", border: "#dc2626" };
 }
-
 function getCatIndex(category: string): number {
   return catKeys.findIndex((k: CategoryKey) => CATEGORIES[k] === category);
 }
-
 function downloadPDF(): void {
   const root = document.getElementById('results-printable');
   const clone = root!.cloneNode(true) as HTMLElement;
@@ -64,10 +62,7 @@ function downloadPDF(): void {
   s.innerHTML = '@media print{@page{margin:0.6in;size:letter}body > *:not(#print-clone){display:none!important}#print-clone{display:block!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}*{overflow:visible!important;max-height:none!important;height:auto!important}button{display:none!important}}';
   document.head.appendChild(s);
   window.print();
-  setTimeout(() => {
-    const e = document.getElementById('pf'); if (e) e.remove();
-    const c = document.getElementById('print-clone'); if (c) c.remove();
-  }, 1500);
+  setTimeout(() => { const e = document.getElementById('pf'); if (e) e.remove(); const c = document.getElementById('print-clone'); if (c) c.remove(); }, 1500);
 }
 
 function ScoringHeader() {
@@ -90,10 +85,10 @@ function ScoringHeader() {
 }
 
 export default function Page() {
+  const [screen, setScreen] = useState<Screen>("intro");
   const [currentQ, setCurrentQ] = useState<number>(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
-  const [done, setDone] = useState<boolean>(false);
 
   const q: Question = questions[currentQ];
   const isLast: boolean = currentQ === questions.length - 1;
@@ -103,15 +98,41 @@ export default function Page() {
   function handleNext(): void {
     if (selected === null) return;
     const newAnswers = [...answers, selected];
-    if (isLast) { setAnswers(newAnswers); setDone(true); }
+    if (isLast) { setAnswers(newAnswers); setScreen("results"); }
     else { setAnswers(newAnswers); setCurrentQ(currentQ + 1); setSelected(null); }
   }
-
   function handleRestart(): void {
-    setCurrentQ(0); setAnswers([]); setSelected(null); setDone(false);
+    setScreen("intro"); setCurrentQ(0); setAnswers([]); setSelected(null);
   }
 
-  if (done) {
+  // ── INTRO ────────────────────────────────────────────────────
+  if (screen === "intro") {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f5f7fc", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div style={{ maxWidth: 640, width: "100%" }}>
+          {/* Hero card */}
+          <div style={{ background: "radial-gradient(120% 140% at 80% -10%, #1b2f7a 0%, #04123d 45%, #08081a 100%)", borderRadius: 20, padding: "48px 40px", marginBottom: 0, boxShadow: "0 10px 40px rgba(52,99,241,0.35)", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", right: -60, top: -60, width: 260, height: 260, borderRadius: 40, background: "radial-gradient(circle, rgba(10,241,255,0.16), transparent 70%)", filter: "blur(6px)" }} />
+            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0af1ff", margin: "0 0 14px" }}>Qumulo · 2-Minute Self-Assessment</p>
+            <h1 style={{ fontFamily: "system-ui, sans-serif", fontSize: "clamp(26px, 5vw, 38px)", fontWeight: 800, lineHeight: 1.1, color: "#fff", margin: "0 0 16px", letterSpacing: "-0.01em" }}>Evaluate the impact of hardware shortages on infrastructure operations and planning.</h1>
+            <p style={{ fontSize: 16, color: "#cdd6f5", margin: "0 0 24px", lineHeight: 1.6, maxWidth: 520 }}>Flash lead times, vendor concentration, and AI-driven growth are squeezing infrastructure supply chains. Answer 10 quick questions to see how the industry shortage may affect your planning — and what to do about it.</p>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap", fontSize: 13, color: "#aab6e6", marginBottom: 30 }}>
+              <span><strong style={{ color: "#fff" }}>10</strong> questions</span>
+              <span><strong style={{ color: "#fff" }}>~2 minutes</strong></span>
+              <span><strong style={{ color: "#fff" }}>Instant</strong> assessment score</span>
+            </div>
+            <button onClick={() => setScreen("quiz")} style={{ background: "#3463f1", color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 18px rgba(52,99,241,0.35)", letterSpacing: "0.01em" }}>
+              Start the assessment →
+            </button>
+            <p style={{ fontSize: 12, color: "#7a8bb5", margin: "16px 0 0", fontStyle: "italic" }}>Your answers are used only to generate your assessment. No pitch — just a diagnostic.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── RESULTS ──────────────────────────────────────────────────
+  if (screen === "results") {
     const totals: { [K in CategoryKey]: number } = { vendor: 0, cloud: 0, procurement: 0, flash: 0, ai: 0 };
     answers.forEach((ai: number, qi: number) => { totals[questions[qi].key] += questions[qi].answers[ai].s; });
     const totalScore: number = Object.values(totals).reduce((a, b) => a + b, 0);
@@ -120,7 +141,6 @@ export default function Page() {
     return (
       <div style={{ minHeight: "100vh", background: "#f9fafb", padding: 24 }}>
         <div id="results-printable" style={{ maxWidth: 560, margin: "0 auto" }}>
-          <ScoringHeader />
           {totalScore > 25 && (
             <div style={{ background: "#111", borderRadius: 12, padding: 24, marginBottom: 16 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: "0 0 6px" }}>💬 Let&apos;s talk about your score</p>
@@ -231,10 +251,10 @@ export default function Page() {
     );
   }
 
+  // ── QUIZ ─────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#f9fafb" }}>
       <div style={{ maxWidth: 560, width: "100%" }}>
-        <ScoringHeader />
         <div style={{ background: "#fff", borderRadius: 12, padding: 40, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: "#9ca3af", margin: "0 0 4px" }}>Category {catIdx + 1} of {catKeys.length}</p>
           <p style={{ fontSize: 16, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{q.category}</p>
